@@ -27,6 +27,7 @@
     --pick:#2f9c63; --pick-soft:#16301f; --pick-line:#2c5a3c;
     --live:#f0b93b; --live-soft:#2e2717;
   }
+  :root:not([data-theme="light"]) .brand img{background:#fff;padding:4px 7px;border-radius:7px}
 }
 :root[data-theme="dark"]{
   --bg:#0d1020; --plate:#171b2e; --plate-2:#1d2239; --sunk:#242a44;
@@ -36,6 +37,7 @@
   --pick:#2f9c63; --pick-soft:#16301f; --pick-line:#2c5a3c;
   --live:#f0b93b; --live-soft:#2e2717;
 }
+:root[data-theme="dark"] .brand img{background:#fff;padding:4px 7px;border-radius:7px}
 
 *{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%}
@@ -52,8 +54,10 @@ a{color:var(--accent)}
 .mast{position:sticky;top:0;z-index:30;background:color-mix(in srgb,var(--bg) 90%,transparent);
   backdrop-filter:blur(10px);border-bottom:1px solid var(--rule)}
 .mast .shell{display:flex;align-items:center;gap:8px;height:58px}
-.mark{display:flex;align-items:center;gap:9px;font-weight:600;font-size:.9rem;letter-spacing:-.012em;margin-right:auto}
-.mark i{width:9px;height:9px;border-radius:3px;background:var(--accent);flex:none}
+.brand{display:flex;align-items:center;gap:9px;margin-right:auto;text-decoration:none;color:var(--ink);
+  min-width:0;border-radius:8px}
+.brand img{height:30px;width:auto;display:block;flex:none}
+.brand span{font-weight:600;font-size:.9rem;letter-spacing:-.012em;white-space:nowrap}
 .links{display:flex;gap:2px}
 .links a{text-decoration:none;color:var(--mid);font-size:.84rem;font-weight:500;padding:6px 13px;
   border-radius:99px;transition:background .15s,color .15s}
@@ -116,7 +120,12 @@ a{color:var(--accent)}
 
 <header class="mast">
   <div class="shell">
-    <span class="mark"><i></i>Cloud &amp; compliance assessment</span>
+    <a class="brand" id="brand" href="https://www.genesesolution.com/" target="_blank" rel="noopener">
+      <img id="logo" src="https://www.genesesolution.com/wp-content/uploads/2020/05/logo-genese.svg"
+           alt="Genese Solution" height="30"
+           onerror="this.remove();var t=document.getElementById('brandtext');if(t)t.hidden=false;">
+      <span id="brandtext" hidden>Genese Solution</span>
+    </a>
     <nav class="links">
       <a href="assessment.html" id="nav-a">Assessment</a>
       <a href="scores.html" id="nav-b" aria-current="page">All scores</a>
@@ -142,6 +151,21 @@ var CONFIG = Object.assign(
   { endpoint:"", quizUrl:"index.html", scoresUrl:"scores.html" },
   window.QUIZ_CONFIG || {}
 );
+
+/* ---------- logo ----------
+   The logo is hardcoded in the <img> above so the browser starts fetching it
+   immediately, before any JavaScript runs. Everything below is optional
+   override: it only changes things if you set them in config.js.            */
+(function(){
+  var a=document.getElementById("brand"), img=document.getElementById("logo"), txt=document.getElementById("brandtext");
+  if(CONFIG.logoLink!==undefined) a.setAttribute("href",CONFIG.logoLink||"#");
+  if(!a.getAttribute("href")||a.getAttribute("href")==="#"){ a.removeAttribute("target"); a.removeAttribute("rel"); }
+  if(!img) return;                                    /* already failed and removed itself */
+  if(CONFIG.logoAlt) img.alt=CONFIG.logoAlt;
+  if(CONFIG.logoHeight) img.style.height=CONFIG.logoHeight;
+  /* empty logoUrl means "keep whatever is in the HTML" — do not touch it */
+  if(CONFIG.logoUrl && CONFIG.logoUrl!==img.getAttribute("src")) img.src=CONFIG.logoUrl;
+})();
 
 /* ---------- theme ---------- */
 var THEMES=["auto","light","dark"], K_THEME="mc.theme";
