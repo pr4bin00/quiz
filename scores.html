@@ -342,8 +342,7 @@ if(!me || !me.answered){
   var left=NQ-me.answered;
   app.innerHTML='<h1 class="display">Not finished yet.</h1>'
     + '<p class="lede">You have answered '+me.answered+' of '+NQ+' questions. '
-    + 'Your maturity score appears once all '+NQ+' are in \u2014 an average of part of the '
-    + 'assessment would not reflect your overall posture.</p>'
+    + 'Your maturity score appears once all ten are answered.</p>'
     + '<div class="scale"><div class="segs">'
     +   (function(){ var h=""; for(var k=0;k<5;k++){
           var f=Math.max(0,Math.min(1,(me.answered/NQ)*5-k))*100;
