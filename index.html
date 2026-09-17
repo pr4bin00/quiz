@@ -177,7 +177,18 @@ a{color:var(--accent)}
 /* result */
 .res{padding:clamp(34px,8vh,70px) 0 70px}
 .bignum{font-size:clamp(5rem,17vw,9rem);line-height:.8;display:block;color:var(--pick)}
+.bignum em{font-style:normal;font-size:.3em;color:var(--mid);letter-spacing:-.01em;margin-left:.12em}
 .bigsub{display:block;font-size:.9rem;color:var(--mid);margin-top:14px}
+.scale{margin:26px 0 0;max-width:420px}
+.scale .segs{display:grid;grid-template-columns:repeat(5,1fr);gap:5px}
+.scale .segs i{height:9px;border-radius:99px;background:var(--sunk);position:relative;overflow:hidden}
+.scale .segs i b{position:absolute;inset:0;width:0;background:var(--pick);border-radius:99px;display:block}
+.scale .ticks{display:grid;grid-template-columns:repeat(5,1fr);gap:5px;margin-top:7px}
+.scale .ticks span{font-size:.68rem;color:var(--faint);text-align:center;font-stretch:112%;font-weight:600}
+.contact{margin:56px 0 0;padding:28px clamp(20px,3vw,32px);background:var(--plate);border:1px solid var(--rule);
+  border-radius:16px;display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap}
+.contact p{margin:0;font-family:var(--serif);font-size:1.08rem;line-height:1.45;color:var(--ink);
+  max-width:40ch;font-variation-settings:"opsz" 18}
 .acts{display:flex;gap:10px;flex-wrap:wrap;margin:32px 0 0}
 .review{list-style:none;margin:46px 0 0;padding:0;border-top:1px solid var(--rule)}
 .review li{display:grid;grid-template-columns:26px 1fr auto;gap:16px;align-items:baseline;
@@ -216,7 +227,7 @@ a{color:var(--accent)}
     </a>
     <nav class="links">
       <a href="#/" id="nav-a" aria-current="page">Assessment</a>
-      <a href="scores.html" id="nav-b">All scores</a>
+      <a href="scores.html" id="nav-b">My score</a>
     </nav>
     <button class="theme" id="theme" title="Colour scheme" aria-label="Colour scheme"></button>
   </div>
@@ -523,6 +534,13 @@ function submit(){
   st.done=true; go("result"); push();
 }
 
+function contactHTML(){
+  var url=CONFIG.contactUrl||"https://www.genesesolution.com/contact-us/";
+  var text=CONFIG.contactText||"If you want to know more about cloud and security compliance";
+  return '<div class="contact"><p>'+esc(text)+'</p>'
+    + '<a class="btn" href="'+esc(url)+'" target="_blank" rel="noopener">Contact us '+ARW+'</a></div>';
+}
+
 /* ---------- result: now the scores appear ---------- */
 function screenResult(){
   var t=total();
@@ -533,13 +551,26 @@ function screenResult(){
       + '<span><span class="qt">'+esc(q.text)+'</span><span class="at">'+esc(label)+'</span></span>'
       + '<span class="s">'+v+'</span></li>';
   }).join("");
+  var n=nAns();
+  var m=n ? t/n : 0;      /* average of the answers; submit requires all 10, so this is t/10 */
+  var segs="", ticks="";
+  for(var k=1;k<=5;k++){
+    var fill=Math.max(0,Math.min(1,m-(k-1)))*100;
+    segs+='<i><b style="width:'+fill+'%"></b></i>';
+    ticks+='<span>'+k+'</span>';
+  }
+
   app.innerHTML='<div class="shell"><div class="res">'
-  + '<span class="bignum fig">'+t+'</span><span class="bigsub">out of '+MAX+'</span>'
-  + '<h1 class="display" style="margin-top:28px">'+esc(st.name)+', that\u2019s your score.</h1>'
-  + '<div class="acts"><a class="btn" href="'+esc(CONFIG.scoresUrl)+'">See everyone\u2019s scores '+ARW+'</a>'
+  + '<span class="bignum fig">'+m.toFixed(1)+'<em>/ 5</em></span>'
+  + '<span class="bigsub">Your overall cloud &amp; compliance maturity, averaged across all ten answers'
+  +   ' &middot; '+t+' points out of '+MAX+'</span>'
+  + '<div class="scale"><div class="segs">'+segs+'</div><div class="ticks">'+ticks+'</div></div>'
+  + '<h1 class="display" style="margin-top:34px">'+esc(st.name)+', that\u2019s your score.</h1>'
+  + '<div class="acts"><a class="btn btn-line" href="'+esc(CONFIG.scoresUrl)+'">View my score again</a>'
   +   '<button class="btn btn-line" id="again">Take it again</button></div>'
   + '<ol class="review">'+review+'</ol>'
   + '<div class="totrow"><span>Total</span><b class="fig">'+t+' / '+MAX+'</b></div>'
+  + contactHTML()
   + '</div></div>';
   document.getElementById("again").addEventListener("click",reset);
 }
