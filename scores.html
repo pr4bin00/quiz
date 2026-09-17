@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>All scores — cloud &amp; compliance assessment</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100..125,400..700&family=Newsreader:opsz,wght@6..72,300..500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#ecedf6; --plate:#ffffff; --plate-2:#f5f6fc; --sunk:#dfe2f0;
+  --ink:#131829; --mid:#575f7d; --faint:#8a92ad;
+  --rule:#d8dcec; --rule-2:#bec4dc;
+  --accent:#2f3aa3; --accent-2:#4c57c9; --soft:#e8eafb; --on-accent:#ffffff;
+  --pick:#1e7a4c; --pick-soft:#e0f2e7; --pick-line:#b5dcc6;
+  --live:#b06a12; --live-soft:#f7ecd8;
+  --sans:'Archivo','Helvetica Neue',Helvetica,Arial,sans-serif;
+  --serif:'Newsreader',Georgia,'Times New Roman',Times,serif;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#0d1020; --plate:#171b2e; --plate-2:#1d2239; --sunk:#242a44;
+    --ink:#e9ebf6; --mid:#a0a7c4; --faint:#767d9c;
+    --rule:#262b45; --rule-2:#3a4161;
+    --accent:#8e97ff; --accent-2:#a4abff; --soft:#222a50; --on-accent:#0d1020;
+    --pick:#2f9c63; --pick-soft:#16301f; --pick-line:#2c5a3c;
+    --live:#f0b93b; --live-soft:#2e2717;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0d1020; --plate:#171b2e; --plate-2:#1d2239; --sunk:#242a44;
+  --ink:#e9ebf6; --mid:#a0a7c4; --faint:#767d9c;
+  --rule:#262b45; --rule-2:#3a4161;
+  --accent:#8e97ff; --accent-2:#a4abff; --soft:#222a50; --on-accent:#0d1020;
+  --pick:#2f9c63; --pick-soft:#16301f; --pick-line:#2c5a3c;
+  --live:#f0b93b; --live-soft:#2e2717;
+}
+
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16px;
+  line-height:1.5;font-variant-numeric:tabular-nums;-webkit-font-smoothing:antialiased}
+button{font:inherit;color:inherit;margin:0}
+a{color:var(--accent)}
+:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:3px}
+@media (prefers-reduced-motion:reduce){*{transition-duration:.01ms!important;animation-duration:.01ms!important}}
+
+.fig{font-stretch:118%;font-weight:700;letter-spacing:-.035em;font-feature-settings:"tnum" 1}
+.shell{max-width:880px;margin:0 auto;padding:0 clamp(18px,5vw,34px)}
+
+.mast{position:sticky;top:0;z-index:30;background:color-mix(in srgb,var(--bg) 90%,transparent);
+  backdrop-filter:blur(10px);border-bottom:1px solid var(--rule)}
+.mast .shell{display:flex;align-items:center;gap:8px;height:58px}
+.mark{display:flex;align-items:center;gap:9px;font-weight:600;font-size:.9rem;letter-spacing:-.012em;margin-right:auto}
+.mark i{width:9px;height:9px;border-radius:3px;background:var(--accent);flex:none}
+.links{display:flex;gap:2px}
+.links a{text-decoration:none;color:var(--mid);font-size:.84rem;font-weight:500;padding:6px 13px;
+  border-radius:99px;transition:background .15s,color .15s}
+.links a:hover{background:var(--plate-2);color:var(--ink)}
+.links a[aria-current]{background:var(--accent);color:var(--on-accent)}
+.theme{display:grid;place-items:center;width:32px;height:32px;margin-left:6px;background:none;
+  border:1px solid var(--rule-2);border-radius:99px;cursor:pointer;color:var(--mid)}
+.theme:hover{background:var(--plate-2);color:var(--ink)}
+.theme svg{width:15px;height:15px;display:block}
+
+.display{font-family:var(--serif);font-weight:350;font-variation-settings:"opsz" 72;
+  font-size:clamp(2.1rem,5vw,3.2rem);line-height:1.04;letter-spacing:-.02em;margin:0 0 10px}
+.muted{color:var(--mid)}
+.sm{font-size:.84rem}
+.btn{display:inline-flex;align-items:center;gap:9px;cursor:pointer;background:var(--accent);
+  color:var(--on-accent);border:none;padding:12px 24px;border-radius:99px;font-weight:600;font-size:.92rem;
+  text-decoration:none;transition:transform .14s cubic-bezier(.2,.8,.3,1),background .14s}
+.btn:hover{transform:translateY(-1px);background:var(--accent-2)}
+.arw{width:14px;height:14px;flex:none}
+
+.dash{padding:clamp(28px,6vh,58px) 0 80px}
+.pulse{display:inline-flex;align-items:center;gap:7px;font-size:.8rem;color:var(--mid)}
+.pulse i{width:7px;height:7px;border-radius:50%;background:var(--live);flex:none;
+  box-shadow:0 0 0 3px var(--live-soft);animation:beat 2.4s ease-in-out infinite}
+@keyframes beat{0%,100%{opacity:1}50%{opacity:.35}}
+
+.board{list-style:none;margin:30px 0 0;padding:0;border-top:2px solid var(--ink)}
+.board li{display:grid;grid-template-columns:34px 1fr auto 62px;gap:16px;align-items:center;
+  padding:15px 0;border-bottom:1px solid var(--rule);background:var(--bg)}
+.board .rank{font-size:.8rem;font-weight:700;font-stretch:112%;color:var(--faint)}
+.board .nm{font-size:1.02rem;font-weight:500;letter-spacing:-.012em;overflow:hidden;
+  text-overflow:ellipsis;white-space:nowrap}
+.board .sub{display:flex;align-items:center;gap:8px;margin-top:5px}
+.board .mini{width:58px;height:3px;background:var(--sunk);border-radius:99px;overflow:hidden;flex:none}
+.board .mini i{display:block;height:100%;background:var(--live);border-radius:99px;transition:width .4s}
+.board .stat{font-size:.71rem;color:var(--faint)}
+.board .sc{font-size:1.65rem;line-height:1;color:var(--pick)}
+.board .of{font-size:.72rem;color:var(--faint);margin-left:3px;font-weight:400;font-stretch:100%;letter-spacing:0}
+.board li.me{background:var(--soft);box-shadow:-14px 0 0 var(--soft),14px 0 0 var(--soft);border-radius:2px}
+.board li.me .nm::after{content:"you";font-size:.64rem;font-weight:700;color:var(--on-accent);
+  background:var(--accent);padding:2px 7px;border-radius:99px;margin-left:9px;vertical-align:1px}
+.board li.bump .sc{animation:bump .5s cubic-bezier(.2,1.6,.4,1)}
+@keyframes bump{0%{transform:scale(1)}35%{transform:scale(1.16);color:var(--live)}100%{transform:scale(1)}}
+.x{background:none;border:none;color:transparent;cursor:pointer;font-size:.72rem;padding:4px 6px;
+  border-radius:99px;white-space:nowrap;text-align:right}
+.board li:hover .x,.x:focus-visible{color:var(--faint)}
+.x:hover{color:#c0392b;background:var(--plate-2)}
+
+.blank{padding:62px 26px;text-align:center;border:1px dashed var(--rule-2);border-radius:18px;margin-top:28px}
+.blank p{margin:0 auto 22px;max-width:36ch;color:var(--mid)}
+.toast{position:fixed;left:50%;bottom:30px;transform:translateX(-50%);z-index:90;background:var(--ink);
+  color:var(--bg);padding:11px 22px;border-radius:99px;font-size:.85rem;font-weight:500}
+@media (max-width:640px){
+  .board li{grid-template-columns:26px 1fr auto 56px;gap:12px}
+  .board li.me{box-shadow:-10px 0 0 var(--soft),10px 0 0 var(--soft)}
+}
+</style>
+</head>
+<body>
+
+<header class="mast">
+  <div class="shell">
+    <span class="mark"><i></i>Cloud &amp; compliance assessment</span>
+    <nav class="links">
+      <a href="assessment.html" id="nav-a">Assessment</a>
+      <a href="scores.html" id="nav-b" aria-current="page">All scores</a>
+    </nav>
+    <button class="theme" id="theme" title="Colour scheme" aria-label="Colour scheme"></button>
+  </div>
+</header>
+
+<div class="shell"><div class="dash">
+  <h1 class="display">All scores</h1>
+  <div class="pulse" id="pulse"></div>
+  <ol class="board" id="board"></ol>
+  <div id="blankslot"></div>
+</div></div>
+
+<script src="config.js"></script>
+<script>
+(function(){
+"use strict";
+
+/* Settings come from config.js — edit that file, not this one. */
+var CONFIG = Object.assign(
+  { endpoint:"", quizUrl:"index.html", scoresUrl:"scores.html" },
+  window.QUIZ_CONFIG || {}
+);
+
+/* ---------- theme ---------- */
+var THEMES=["auto","light","dark"], K_THEME="mc.theme";
+var GLYPH={
+ auto:'<svg viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6.4" stroke="currentColor" stroke-width="1.5"/><path d="M8 1.6a6.4 6.4 0 0 1 0 12.8z" fill="currentColor"/></svg>',
+ light:'<svg viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="3.3" stroke="currentColor" stroke-width="1.5"/><path d="M8 .8v1.8M8 13.4v1.8M15.2 8h-1.8M2.6 8H.8M13.1 13.1l-1.3-1.3M4.2 4.2 2.9 2.9M13.1 2.9l-1.3 1.3M4.2 11.8l-1.3 1.3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>',
+ dark:'<svg viewBox="0 0 16 16" fill="none"><path d="M13.6 9.9A6 6 0 0 1 6.1 2.4a6 6 0 1 0 7.5 7.5z" fill="currentColor"/></svg>'
+};
+var theme="auto";
+try{ var tv=localStorage.getItem(K_THEME); if(THEMES.indexOf(tv)>-1) theme=tv; }catch(e){}
+function applyTheme(){
+  var r=document.documentElement;
+  if(theme==="auto") r.removeAttribute("data-theme"); else r.setAttribute("data-theme",theme);
+  var b=document.getElementById("theme"), l=theme==="auto"?"follows your device":theme;
+  b.innerHTML=GLYPH[theme]; b.title="Colour scheme: "+l; b.setAttribute("aria-label","Colour scheme: "+l);
+}
+applyTheme();
+document.getElementById("theme").addEventListener("click",function(){
+  theme=THEMES[(THEMES.indexOf(theme)+1)%3];
+  try{ localStorage.setItem(K_THEME,theme); }catch(e){}
+  applyTheme();
+});
+document.getElementById("nav-a").setAttribute("href",CONFIG.quizUrl);
+
+var NQ=10, MAX=NQ*5;
+var K_ATT="mc.attempt.v4", K_MINE="mc.mine.v4";
+function rj(k,f){ try{ var v=localStorage.getItem(k); return v?JSON.parse(v):f; }catch(e){ return f; } }
+var myId=(rj(K_ATT,{})||{}).id||null;
+
+/* ---------- reading scores ---------- */
+var MODE="local", DB=null, sub=null, poll=null, rows=[], netErr=false;
+(function boot(){
+  var fb=function(){ MODE=CONFIG.endpoint?"remote":"local"; setTimeout(start,0); };
+  if(window.claude&&typeof window.claude.use==="function"){
+    window.claude.use("db").then(function(d){
+      if(d){ DB=d; MODE="claude"; start(); } else fb();
+    }).catch(fb);
+  } else fb();
+})();
+function shared(){ return MODE==="claude"||MODE==="remote"; }
+function start(){
+  if(MODE==="claude"){
+    try{
+      sub=DB.collection("responses").orderBy("total","desc").limit(500).onSnapshot(function(s){
+        rows=s.docs.map(function(d){ return {id:d.id,d:d.data()||{}}; }); netErr=false; paint();
+      },function(){ paint(); });
+    }catch(e){ paint(); }
+  } else if(MODE==="remote"){
+    pull(); poll=setInterval(pull,4000);
+    document.addEventListener("visibilitychange",function(){ if(!document.hidden) pull(); });
+  } else paint();
+}
+function pull(){
+  fetch(CONFIG.endpoint+"?action=list",{cache:"no-store"})
+    .then(function(r){ return r.json(); })
+    .then(function(j){ rows=(j&&j.scores||[]).map(function(x){ return {id:String(x.id),d:x}; });
+      netErr=false; paint(); })
+    .catch(function(){ netErr=true; paint(); });
+}
+function wipe(id){
+  if(MODE==="claude") return DB.doc("responses/"+id).delete();
+  if(MODE==="remote") return fetch(CONFIG.endpoint,{method:"POST",
+    body:JSON.stringify({action:"delete",id:id})}).then(pull);
+  return Promise.resolve();
+}
+function localRows(){ var m=rj(K_MINE,{}); return Object.keys(m).map(function(k){ return {id:k,d:m[k]}; }); }
+
+/* ---------- helpers ---------- */
+function esc(s){ return String(s==null?"":s).replace(/[&<>"']/g,function(c){
+  return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]; }); }
+var tt=null;
+function toast(m){
+  var o=document.querySelector(".toast"); if(o) o.remove();
+  var t=document.createElement("div"); t.className="toast"; t.setAttribute("role","status"); t.textContent=m;
+  document.body.appendChild(t); if(tt) clearTimeout(tt);
+  tt=setTimeout(function(){ t.remove(); },3200);
+}
+function arm(btn,label,fn){
+  var orig=btn.innerHTML,hot=false,t=null;
+  btn.addEventListener("click",function(){
+    if(hot){ clearTimeout(t); btn.innerHTML=orig; hot=false; fn(); return; }
+    hot=true; btn.innerHTML=label; t=setTimeout(function(){ hot=false; btn.innerHTML=orig; },4000);
+  });
+}
+function calm(){ return window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches; }
+function cssq(s){ return (window.CSS&&CSS.escape)?CSS.escape(s):String(s).replace(/[^\w-]/g,""); }
+var ARW='<svg class="arw" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M2 8h11M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+
+/* ---------- the board ---------- */
+var seen={};
+function paint(){
+  var list=document.getElementById("board");
+  var blank=document.getElementById("blankslot");
+  var data=(shared()?rows:localRows()).slice().sort(function(a,b){
+    return (b.d.total||0)-(a.d.total||0) || (a.d.name||"").localeCompare(b.d.name||"");
+  });
+  var live=data.filter(function(r){ return !r.d.completed; }).length;
+  var fin=data.length-live;
+
+  var pulse=document.getElementById("pulse");
+  if(netErr){
+    pulse.innerHTML='<span class="sm muted">Reconnecting\u2026</span>';
+  } else if(!shared()){
+    pulse.innerHTML='<span class="sm muted">'+data.length+' result'+(data.length===1?'':'s')+'</span>';
+  } else {
+    pulse.innerHTML = data.length
+      ? '<i></i>'+fin+' finished'+(live?' &middot; '+live+' still answering':'')+' &middot; updating live'
+      : '<span class="sm muted">Waiting for the first answer.</span>';
+  }
+
+  if(!data.length){
+    list.innerHTML="";
+    blank.innerHTML='<div class="blank"><p>No scores yet. Send people to the assessment and they appear here '
+      + 'the moment they start answering.</p><a class="btn" href="'+esc(CONFIG.quizUrl)+'">Open the assessment '+ARW+'</a></div>';
+    return;
+  }
+  blank.innerHTML="";
+
+  /* FLIP so rows visibly slide when someone overtakes */
+  var first={};
+  [].slice.call(list.children).forEach(function(li){ first[li.dataset.id]=li.getBoundingClientRect().top; });
+
+  var keep={};
+  data.forEach(function(r,i){
+    var li=list.querySelector('li[data-id="'+cssq(r.id)+'"]');
+    if(!li){
+      li=document.createElement("li"); li.dataset.id=r.id;
+      li.innerHTML='<span class="rank"></span>'
+        + '<span><span class="nm"></span><span class="sub"><span class="mini"><i></i></span>'
+        + '<span class="stat"></span></span></span>'
+        + '<span class="sc fig"></span><button class="x" type="button">Remove</button>';
+    }
+    keep[r.id]=1; fill(li,r,i); list.appendChild(li);
+  });
+  [].slice.call(list.children).forEach(function(li){ if(!keep[li.dataset.id]) li.remove(); });
+
+  if(!calm()){
+    [].slice.call(list.children).forEach(function(li){
+      var was=first[li.dataset.id]; if(was==null) return;
+      var d=was-li.getBoundingClientRect().top; if(!d) return;
+      li.style.transition="none"; li.style.transform="translateY("+d+"px)";
+      requestAnimationFrame(function(){
+        li.style.transition="transform .45s cubic-bezier(.2,.8,.3,1)"; li.style.transform="";
+      });
+    });
+  }
+}
+function fill(li,r,i){
+  var d=r.d, done=d.completed, n=d.answered||0, t=d.total||0;
+  li.className = (myId&&r.id===myId)?"me":"";
+  li.querySelector(".rank").textContent=i+1;
+  li.querySelector(".nm").textContent=d.name||"Anonymous";
+  if(seen[r.id]!=null && seen[r.id]!==t){
+    li.classList.add("bump");
+    setTimeout(function(){ li.classList.remove("bump"); },560);
+  }
+  seen[r.id]=t;
+  li.querySelector(".sc").innerHTML=t+'<span class="of">/ '+MAX+'</span>';
+  li.querySelector(".sub").style.display = done?"none":"flex";
+  li.querySelector(".mini i").style.width=(n/NQ*100)+"%";
+  li.querySelector(".stat").textContent=n+" of "+NQ+" answered";
+  var x=li.querySelector(".x");
+  if(!x.dataset.wired){
+    x.dataset.wired="1";
+    arm(x,"Sure?",function(){
+      var id=li.dataset.id, m=rj(K_MINE,{}); delete m[id];
+      try{ localStorage.setItem(K_MINE,JSON.stringify(m)); }catch(e){}
+      if(shared()) wipe(id).catch(function(){ toast("That entry could not be removed."); });
+      else paint();
+    });
+  }
+}
+paint();
+
+})();
+</script>
+</body>
+</html>
