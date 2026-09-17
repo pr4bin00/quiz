@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -18,18 +18,6 @@
   --sans:'Archivo','Helvetica Neue',Helvetica,Arial,sans-serif;
   --serif:'Newsreader',Georgia,'Times New Roman',Times,serif;
   --lift:0 1px 2px rgba(19,24,41,.05), 0 10px 30px -18px rgba(19,24,41,.3);
-}
-@media (prefers-color-scheme:dark){
-  :root:not([data-theme="light"]){
-    --bg:#0d1020; --plate:#171b2e; --plate-2:#1d2239; --sunk:#242a44;
-    --ink:#e9ebf6; --mid:#a0a7c4; --faint:#767d9c;
-    --rule:#262b45; --rule-2:#3a4161;
-    --accent:#8e97ff; --accent-2:#a4abff; --soft:#222a50; --on-accent:#0d1020; --tintline:#39406b;
-    --pick:#2f9c63; --on-pick:#04170d; --pick-soft:#16301f; --pick-line:#2c5a3c;
-    --live:#f0b93b; --live-soft:#2e2717;
-    --lift:0 1px 2px rgba(0,0,0,.4), 0 14px 34px -20px rgba(0,0,0,.8);
-  }
-  :root:not([data-theme="light"]) .brand img{background:#fff;padding:4px 7px;border-radius:7px}
 }
 :root[data-theme="dark"]{
   --bg:#0d1020; --plate:#171b2e; --plate-2:#1d2239; --sunk:#242a44;
@@ -264,28 +252,26 @@ var CONFIG = Object.assign(
 })();
 
 /* ---------- theme ---------- */
-var THEMES=["auto","light","dark"], K_THEME="mc.theme";
+var THEMES=["light","dark"], K_THEME="mc.theme";
 var GLYPH={
- auto:'<svg viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6.4" stroke="currentColor" stroke-width="1.5"/><path d="M8 1.6a6.4 6.4 0 0 1 0 12.8z" fill="currentColor"/></svg>',
  light:'<svg viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="3.3" stroke="currentColor" stroke-width="1.5"/><path d="M8 .8v1.8M8 13.4v1.8M15.2 8h-1.8M2.6 8H.8M13.1 13.1l-1.3-1.3M4.2 4.2 2.9 2.9M13.1 2.9l-1.3 1.3M4.2 11.8l-1.3 1.3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>',
  dark:'<svg viewBox="0 0 16 16" fill="none"><path d="M13.6 9.9A6 6 0 0 1 6.1 2.4a6 6 0 1 0 7.5 7.5z" fill="currentColor"/></svg>'
 };
-var theme="auto";
+var theme="light";                                  /* light is the default */
 try{ var tv=localStorage.getItem(K_THEME); if(THEMES.indexOf(tv)>-1) theme=tv; }catch(e){}
 function applyTheme(){
-  var r=document.documentElement;
-  if(theme==="auto") r.removeAttribute("data-theme"); else r.setAttribute("data-theme",theme);
-  var b=document.getElementById("theme"), l=theme==="auto"?"follows your device":theme;
-  b.innerHTML=GLYPH[theme]; b.title="Colour scheme: "+l; b.setAttribute("aria-label","Colour scheme: "+l);
+  document.documentElement.setAttribute("data-theme",theme);   /* always explicit */
+  var b=document.getElementById("theme"), next=(theme==="light"?"dark":"light");
+  b.innerHTML=GLYPH[theme];
+  b.title="Switch to "+next+" mode";
+  b.setAttribute("aria-label","Switch to "+next+" mode");
 }
 applyTheme();
 document.getElementById("theme").addEventListener("click",function(){
-  theme=THEMES[(THEMES.indexOf(theme)+1)%3];
+  theme=(theme==="light"?"dark":"light");
   try{ localStorage.setItem(K_THEME,theme); }catch(e){}
   applyTheme();
 });
-document.getElementById("nav-b").setAttribute("href",CONFIG.scoresUrl);
-
 
 var NQ=10, MAX=NQ*5;
 var K_ATT="mc.attempt.v4", K_MINE="mc.mine.v4";
