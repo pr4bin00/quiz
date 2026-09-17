@@ -185,6 +185,8 @@ a{color:var(--accent)}
 .scale .segs i b{position:absolute;inset:0;width:0;background:var(--pick);border-radius:99px;display:block}
 .scale .ticks{display:grid;grid-template-columns:repeat(5,1fr);gap:5px;margin-top:7px}
 .scale .ticks span{font-size:.68rem;color:var(--faint);text-align:center;font-stretch:112%;font-weight:600}
+.scale .ticks:has(span:only-child){grid-template-columns:1fr}
+.scale .ticks span:only-child{text-align:left}
 .contact{margin:56px 0 0;padding:28px clamp(20px,3vw,32px);background:var(--plate);border:1px solid var(--rule);
   border-radius:16px;display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap}
 .contact p{margin:0;font-family:var(--serif);font-size:1.08rem;line-height:1.45;color:var(--ink);
@@ -334,9 +336,25 @@ if(!me || !me.answered){
     + '<p class="lede">Take the ten-question assessment and your result appears here.</p>'
     + '<div class="acts"><a class="btn" href="'+esc(CONFIG.quizUrl||"index.html")+'">Start the assessment '+ARW+'</a></div>'
     + contactHTML();
+} else if(me.answered < NQ){
+  /* Incomplete: no maturity figure. An average over a subset is not an
+     "overall" score, and it would reward answering only the easy questions. */
+  var left=NQ-me.answered;
+  app.innerHTML='<h1 class="display">Not finished yet.</h1>'
+    + '<p class="lede">You have answered '+me.answered+' of '+NQ+' questions. '
+    + 'Your maturity score appears once all '+NQ+' are in \u2014 an average of part of the '
+    + 'assessment would not reflect your overall posture.</p>'
+    + '<div class="scale"><div class="segs">'
+    +   (function(){ var h=""; for(var k=0;k<5;k++){
+          var f=Math.max(0,Math.min(1,(me.answered/NQ)*5-k))*100;
+          h+='<i><b style="width:'+f+'%"></b></i>'; } return h; })()
+    + '</div><div class="ticks"><span>'+me.answered+' of '+NQ+' answered</span></div></div>'
+    + '<div class="acts"><a class="btn" href="'+esc(CONFIG.quizUrl||"index.html")+'">'
+    +   'Answer the last '+left+' question'+(left===1?'':'s')+' '+ARW+'</a></div>'
+    + contactHTML();
+
 } else {
-  var t=me.total, partial=me.answered<NQ;
-  var m=me.answered ? t/me.answered : 0;   /* average of what was answered; == t/10 when complete */
+  var t=me.total, m=t/NQ;
   var segs="", ticks="";
   for(var k=1;k<=5;k++){
     segs+='<i><b style="width:'+(Math.max(0,Math.min(1,m-(k-1)))*100)+'%"></b></i>';
@@ -344,20 +362,15 @@ if(!me || !me.answered){
   }
   var review="";
   for(var i=0;i<NQ;i++){
-    var v=me.answers["q"+(i+1)];
     review+='<li><span class="n2">'+(i+1)+'</span>'
       + '<span><span class="qt">'+esc(QTEXT[i])+'</span></span>'
-      + '<span class="s">'+(v?v:"\u2014")+'</span></li>';
+      + '<span class="s">'+me.answers["q"+(i+1)]+'</span></li>';
   }
   app.innerHTML='<span class="bignum fig">'+m.toFixed(1)+'<em>/ 5</em></span>'
-    + '<span class="bigsub">Your overall cloud &amp; compliance maturity, averaged across '
-    +   (partial?me.answered+' answered question'+(me.answered===1?'':'s'):'all ten answers')
+    + '<span class="bigsub">Your overall cloud &amp; compliance maturity, averaged across all ten answers'
     +   ' &middot; '+t+' points out of '+MAX+'</span>'
     + '<div class="scale"><div class="segs">'+segs+'</div><div class="ticks">'+ticks+'</div></div>'
     + '<h1 class="display" style="margin-top:34px">'+esc(me.name)+', that\u2019s your overall maturity score.</h1>'
-    + (partial ? '<p class="lede">You still have '+(NQ-me.answered)+' question'+(NQ-me.answered===1?'':'s')
-        +' to answer.</p><div class="acts"><a class="btn" href="'+esc(CONFIG.quizUrl||"index.html")
-        +'">Finish the assessment '+ARW+'</a></div>' : '')
     + '<ol class="review">'+review+'</ol>'
     + '<div class="totrow"><span>Total</span><b class="fig">'+t+' / '+MAX+'</b></div>'
     + contactHTML();
