@@ -9,7 +9,7 @@ window.QUIZ_CONFIG = {
         You get this from step A6 in README.md (it ends in /exec).
         Leave it as "" and each visitor will only ever see their own
         score — nothing is shared.                                  */
-  endpoint: "",
+  endpoint: "https://script.google.com/macros/s/AKfycby-LnUpd3oGYa5JMPYTxZYA8pOlv0D6cD-dR72lClGJTycTIJlVM6hP0ODfwnFH9z8-kg/exec",
 
 
   /* 2. Leave these alone unless you rename the files or split them
