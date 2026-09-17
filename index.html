@@ -531,7 +531,24 @@ function tick(){
 }
 function submit(){
   if(nAns()!==NQ||!st.name) return;
-  st.done=true; go("result"); push();
+  st.done=true; persist();
+  var btn=document.getElementById("submit"), btn2=document.getElementById("submit2");
+  if(btn){ btn.disabled=true; btn.textContent="Saving\u2026"; }
+  if(btn2) btn2.disabled=true;
+  /* make sure the completed record reaches the sheet, then show them their result */
+  var gone=false;
+  var leave=function(){ if(gone) return; gone=true; location.href=CONFIG.scoresUrl||"scores.html"; };
+  setTimeout(leave,1800);              /* never hang on a slow network */
+  flushThen(leave);
+}
+
+/* one final write, with a callback, used on submit */
+function flushThen(cb){
+  if(wt) clearTimeout(wt);
+  if(!st.id||!st.name||!shared()){ cb(); return; }
+  if(MODE==="claude") DB.doc("responses/"+st.id).set(rec()).then(cb,cb);
+  else fetch(CONFIG.endpoint,{method:"POST",
+        body:JSON.stringify({action:"save",id:st.id,record:rec()})}).then(cb,cb);
 }
 
 function contactHTML(){
@@ -565,8 +582,8 @@ function screenResult(){
   + '<span class="bigsub">Your overall cloud &amp; compliance maturity, averaged across all ten answers'
   +   ' &middot; '+t+' points out of '+MAX+'</span>'
   + '<div class="scale"><div class="segs">'+segs+'</div><div class="ticks">'+ticks+'</div></div>'
-  + '<h1 class="display" style="margin-top:34px">'+esc(st.name)+', that\u2019s your score.</h1>'
-  + '<div class="acts"><a class="btn btn-line" href="'+esc(CONFIG.scoresUrl)+'">View my score again</a>'
+  + '<h1 class="display" style="margin-top:34px">'+esc(st.name)+', that\u2019s your overall maturity score.</h1>'
+  + '<div class="acts"><a class="btn" href="'+esc(CONFIG.scoresUrl)+'">View my score '+ARW+'</a>'
   +   '<button class="btn btn-line" id="again">Take it again</button></div>'
   + '<ol class="review">'+review+'</ol>'
   + '<div class="totrow"><span>Total</span><b class="fig">'+t+' / '+MAX+'</b></div>'
