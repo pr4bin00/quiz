@@ -149,6 +149,13 @@ a{color:var(--accent)}
   padding:6px 12px;border-radius:99px;margin-left:auto}
 .reset:hover{color:var(--ink);background:var(--plate-2)}
 
+.doneline{display:flex;align-items:center;gap:11px;background:var(--pick-soft);
+  border:1px solid var(--pick-line);border-radius:12px;padding:11px 15px;margin:0 0 6px;
+  font-size:.86rem;color:var(--ink);flex-wrap:wrap}
+.doneline .tick{width:20px;height:20px;border-radius:50%;background:var(--pick);color:#fff;
+  display:grid;place-items:center;font-size:.7rem;font-weight:700;flex:none}
+.doneline .linkbtn{margin-left:auto}
+
 /* live progress bar */
 .bar{position:sticky;bottom:0;z-index:20;background:color-mix(in srgb,var(--bg) 90%,transparent);
   backdrop-filter:blur(10px);border-top:1px solid var(--rule)}
@@ -163,34 +170,6 @@ a{color:var(--accent)}
   transition:width .4s cubic-bezier(.2,.8,.3,1)}
 
 /* result */
-.res{padding:clamp(34px,8vh,70px) 0 70px}
-.bignum{font-size:clamp(5rem,17vw,9rem);line-height:.8;display:block;color:var(--pick)}
-.bignum em{font-style:normal;font-size:.3em;color:var(--mid);letter-spacing:-.01em;margin-left:.12em}
-.bigsub{display:block;font-size:.9rem;color:var(--mid);margin-top:14px}
-.scale{margin:26px 0 0;max-width:420px}
-.scale .segs{display:grid;grid-template-columns:repeat(5,1fr);gap:5px}
-.scale .segs i{height:9px;border-radius:99px;background:var(--sunk);position:relative;overflow:hidden}
-.scale .segs i b{position:absolute;inset:0;width:0;background:var(--pick);border-radius:99px;display:block}
-.scale .ticks{display:grid;grid-template-columns:repeat(5,1fr);gap:5px;margin-top:7px}
-.scale .ticks span{font-size:.68rem;color:var(--faint);text-align:center;font-stretch:112%;font-weight:600}
-.contact{margin:56px 0 0;padding:28px clamp(20px,3vw,32px);background:var(--plate);border:1px solid var(--rule);
-  border-radius:16px;display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap}
-.contact p{margin:0;font-family:var(--serif);font-size:1.08rem;line-height:1.45;color:var(--ink);
-  max-width:40ch;font-variation-settings:"opsz" 18}
-.acts{display:flex;gap:10px;flex-wrap:wrap;margin:32px 0 0}
-.review{list-style:none;margin:46px 0 0;padding:0;border-top:1px solid var(--rule)}
-.review li{display:grid;grid-template-columns:26px 1fr auto;gap:16px;align-items:baseline;
-  padding:14px 0;border-bottom:1px solid var(--rule)}
-.review .n2{font-size:.76rem;font-weight:700;font-stretch:112%;color:var(--faint)}
-.review .qt{font-size:.9rem;line-height:1.35}
-.review .at{display:block;font-family:var(--serif);font-size:.95rem;color:var(--mid);margin-top:3px;
-  font-variation-settings:"opsz" 14}
-.review .s{font-size:.78rem;font-weight:700;font-stretch:112%;color:var(--pick);
-  background:var(--pick-soft);box-shadow:inset 0 0 0 1px var(--pick-line);border-radius:99px;padding:3px 11px}
-.totrow{display:flex;align-items:baseline;justify-content:space-between;gap:16px;
-  padding:18px 0 0;border-top:2px solid var(--ink);margin-top:2px}
-.totrow span{font-size:.86rem;color:var(--mid)}
-.totrow b{font-size:1.5rem}
 
 .toast{position:fixed;left:50%;bottom:30px;transform:translateX(-50%);z-index:90;background:var(--ink);
   color:var(--bg);padding:11px 22px;border-radius:99px;font-size:.85rem;font-weight:500}
@@ -199,7 +178,6 @@ a{color:var(--accent)}
   .opts{padding:0 14px 16px 14px}
   .qhead{grid-template-columns:24px 1fr 16px;gap:0 11px;padding:15px 14px}
   .tally b{font-size:1.6rem}
-  .review li{grid-template-columns:22px 1fr auto;gap:12px}
 }
 </style>
 </head>
@@ -407,6 +385,11 @@ function screenQuiz(){
   + '<h1 class="display">Ten questions about how you run things today.</h1>'
   + '<p class="lede">Pick the answer closest to reality, not to the plan. Your full score, and the score for '
   +   'each question, is shown once you submit.</p>'
+  + (st.done && st.name && nAns()===NQ
+       ? '<div class="doneline"><span class="tick">\u2713</span>'
+         + '<span>You have already submitted this. Change an answer below to update it.</span>'
+         + '<a class="linkbtn" href="'+esc(CONFIG.scoresUrl||"scores.html")+'">View my score</a></div>'
+       : '')
   + (showGate
      ? '<div class="gate"><h2>'+(named?"Change your name":"Add your name to begin")+'</h2>'
        + '<p>Your progress goes onto the scoreboard as you answer, so it needs a name against it.</p>'
@@ -538,58 +521,16 @@ function flushThen(cb){
         body:JSON.stringify({action:"save",id:st.id,record:rec()})}).then(cb,cb);
 }
 
-function contactHTML(){
-  var url=CONFIG.contactUrl||"https://www.genesesolution.com/contact-us/";
-  var text=CONFIG.contactText||"If you want to know more about cloud and security compliance";
-  return '<div class="contact"><p>'+esc(text)+'</p>'
-    + '<a class="btn" href="'+esc(url)+'" target="_blank" rel="noopener">Contact us '+ARW+'</a></div>';
-}
-
-/* ---------- result: now the scores appear ---------- */
-function screenResult(){
-  var t=total();
-  var review=QUESTIONS.map(function(q,i){
-    var v=st.answers[q.id], label="";
-    q.options.forEach(function(o){ if(o[1]===v) label=o[0]; });
-    return '<li><span class="n2">'+(i+1)+'</span>'
-      + '<span><span class="qt">'+esc(q.text)+'</span><span class="at">'+esc(label)+'</span></span>'
-      + '<span class="s">'+v+'</span></li>';
-  }).join("");
-  var n=nAns();
-  var m=n ? t/n : 0;      /* average of the answers; submit requires all 10, so this is t/10 */
-  var segs="", ticks="";
-  for(var k=1;k<=5;k++){
-    var fill=Math.max(0,Math.min(1,m-(k-1)))*100;
-    segs+='<i><b style="width:'+fill+'%"></b></i>';
-    ticks+='<span>'+k+'</span>';
-  }
-
-  app.innerHTML='<div class="shell"><div class="res">'
-  + '<span class="bignum fig">'+m.toFixed(1)+'<em>/ 5</em></span>'
-  + '<span class="bigsub">Your overall cloud &amp; compliance maturity, averaged across all ten answers'
-  +   ' &middot; '+t+' points out of '+MAX+'</span>'
-  + '<div class="scale"><div class="segs">'+segs+'</div><div class="ticks">'+ticks+'</div></div>'
-  + '<h1 class="display" style="margin-top:34px">'+esc(st.name)+', that\u2019s your overall maturity score.</h1>'
-  + '<div class="acts"><a class="btn" href="'+esc(CONFIG.scoresUrl)+'">View my score '+ARW+'</a>'
-  +   '<button class="btn btn-line" id="again">Take it again</button></div>'
-  + '<ol class="review">'+review+'</ol>'
-  + '<div class="totrow"><span>Total</span><b class="fig">'+t+' / '+MAX+'</b></div>'
-  + contactHTML()
-  + '</div></div>';
-  document.getElementById("again").addEventListener("click",reset);
-}
-
 /* ---------- routing ---------- */
 function reset(){
   st.id=null; st.answers={}; st.order=freshOrder(); st.open={}; st.done=false; st.startedAt=null;
   try{ localStorage.removeItem(K_ATT); }catch(e){}
-  persist(); go("quiz");
+  persist(); render(); window.scrollTo(0,0);
 }
-function go(s){ st.screen=s; persist(); render(); window.scrollTo(0,0); }
-function render(){ if(st.screen==="result") screenResult(); else screenQuiz(); }
+/* This page is only ever the questions. The result lives on the My score page. */
+function render(){ screenQuiz(); }
 
 revive();
-st.screen = (st.done&&st.id) ? "result" : "quiz";
 render();
 
 })();
