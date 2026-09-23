@@ -206,7 +206,7 @@ a{color:var(--accent)}
 (function(){
 "use strict";
 
-/* Settings come from config.js — edit that file, not this one. */
+/* Settings come from config.js. Edit that file, not this one. */
 var CONFIG = Object.assign(
   { endpoint:"", quizUrl:"index.html", scoresUrl:"scores.html" },
   window.QUIZ_CONFIG || {}
@@ -223,7 +223,7 @@ var CONFIG = Object.assign(
   if(!img) return;                                    /* already failed and removed itself */
   if(CONFIG.logoAlt) img.alt=CONFIG.logoAlt;
   if(CONFIG.logoHeight) img.style.height=CONFIG.logoHeight;
-  /* empty logoUrl means "keep whatever is in the HTML" — do not touch it */
+  /* empty logoUrl means "keep whatever is in the HTML", so leave it alone */
   if(CONFIG.logoUrl && CONFIG.logoUrl!==img.getAttribute("src")) img.src=CONFIG.logoUrl;
 })();
 
@@ -252,13 +252,13 @@ document.getElementById("theme").addEventListener("click",function(){
 /* ---------- questions ---------- */
 var QUESTIONS=[
  {id:"q1",text:"Who owns security and compliance in your company?",
-  options:[["Nobody specifically — it comes up when a customer asks",1],["Someone handles it informally alongside their main job",2],["A named owner with time set aside for it",3],["A named owner plus documented management review",4],["Defined ownership, scheduled management review, visible to the board",5]]},
+  options:[["Nobody specifically, it comes up when a customer asks",1],["Someone handles it informally alongside their main job",2],["A named owner with time set aside for it",3],["A named owner plus documented management review",4],["Defined ownership, scheduled management review, visible to the board",5]]},
  {id:"q2",text:"Do you have documented security policies?",
   options:[["Nothing written down",1],["A few informal notes or a section in the handbook",2],["Core policies written: access, incident, change, data",3],["A full policy set, formally approved and reviewed each year",4],["Policies mapped to controls, versioned, and acknowledged by every employee",5]]},
  {id:"q3",text:"Have you carried out a documented risk assessment?",
   options:[["No",1],["We talk about risks informally",2],["A risk register exists but is rarely updated",3],["A documented assessment with named owners and treatment plans",4],["Reassessed on a schedule and feeding a Statement of Applicability",5]]},
  {id:"q4",text:"Do you know what data you hold, where it lives and how sensitive it is?",
-  options:[["No inventory — it lives in people's heads",1],["A rough idea, nothing written down",2],["An inventory exists but is maintained by hand",3],["Inventory maintained with classification and named owners",4],["Inventory largely automated, classified and reviewed regularly",5]]},
+  options:[["No inventory, it lives in people's heads",1],["A rough idea, nothing written down",2],["An inventory exists but is maintained by hand",3],["Inventory maintained with classification and named owners",4],["Inventory largely automated, classified and reviewed regularly",5]]},
  {id:"q5",text:"How do people get access to your systems?",
   options:[["Shared accounts and shared passwords",1],["Individual accounts, MFA applied inconsistently",2],["Individual accounts with MFA enforced everywhere",3],["Centralised SSO with role-based access",4],["SSO, least privilege, and access reviews on a schedule",5]]},
  {id:"q6",text:"What happens when somebody joins or leaves?",
@@ -372,7 +372,7 @@ function screenQuiz(){
     var opts=order.map(function(idx){
       var o=q.options[idx], on=chosen===o[1];
       if(on) label=o[0];
-      /* no score shown here — the option's value is revealed only after submitting */
+      /* no score shown here. The value is revealed only after submitting */
       return '<li class="opt'+(on?" on":"")+'">'
         + '<input type="radio" name="'+q.id+'" value="'+o[1]+'"'+(on?" checked":"")
         + (named?"":" disabled")+' aria-label="'+esc(o[0])+'">'
