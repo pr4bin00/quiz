@@ -252,7 +252,7 @@ document.getElementById("theme").addEventListener("click",function(){
 /* ---------- questions ---------- */
 var QUESTIONS=[
  {id:"q1",text:"Who owns security and compliance in your company?",
-  options:[["Nobody specifically, it comes up when a customer asks",1],["Someone handles it informally alongside their main job",2],["A named owner with time set aside for it",3],["A named owner plus documented management review",4],["Defined ownership, scheduled management review, visible to the board",5]]},
+  options:[["Nobody specifically, it comes up when a customer asks",1],["Someone handles it informally alongside their main job",2],["A named owner with time set aside for it",3],["A named owner plus documented management review",4],["Defined ownership, with scheduled review by leadership",5]]},
  {id:"q2",text:"Do you have documented security policies?",
   options:[["Nothing written down",1],["A few informal notes or a section in the handbook",2],["Core policies written: access, incident, change, data",3],["A full policy set, formally approved and reviewed each year",4],["Policies mapped to controls, versioned, and acknowledged by every employee",5]]},
  {id:"q3",text:"Have you carried out a documented risk assessment?",
@@ -279,8 +279,8 @@ var QUESTIONS=[
   options:[["None",1],["Informal guidance when they join",2],["Security training at onboarding",3],["Annual training with completion records",4],["Annual training plus phishing simulation, with evidence retained",5]]},
  {id:"q14",text:"How do you collect evidence that your controls are actually working?",
   options:[["We don't collect evidence",1],["We scramble for it when a customer asks",2],["Some evidence is stored centrally",3],["Collected against a control list on a schedule",4],["Continuously and automatically collected, mapped to controls",5]]},
- {id:"q15",text:"Where are you with SOC 2 or ISO 27001 today?",
-  options:[["We haven't looked into it",1],["We're exploring it because customers keep asking",2],["We know roughly where the gaps are but haven't started",3],["A readiness programme is already underway",4],["Certified or attested, and maintaining it",5]]}
+ {id:"q15",text:"If a customer asked for proof of your security posture tomorrow, what could you send them?",
+  options:[["Nothing, we would answer their questions from scratch each time",1],["A security page, or a few paragraphs in an email",2],["A completed questionnaire we reuse",3],["A filled-in standard questionnaire pack, or a penetration test report",4],["A SOC 2 or ISO 27001 report",5]]}
 ];
 var NQ=QUESTIONS.length, MAX=NQ*5;
 
