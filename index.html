@@ -277,8 +277,8 @@ var QUESTIONS=[
   options:[["Ad hoc, or none",1],["Backups run but have never been restored",2],["Backups monitored and occasionally test-restored",3],["Agreed RPO and RTO with scheduled restore tests",4],["Tested, automated, with a documented continuity plan",5]]},
  {id:"q13",text:"Do your people receive security training?",
   options:[["None",1],["Informal guidance when they join",2],["Security training at onboarding",3],["Annual training with completion records",4],["Annual training plus phishing simulation, with evidence retained",5]]},
- {id:"q14",text:"How do you collect the evidence an auditor would ask for?",
-  options:[["We don't collect evidence",1],["We scramble for it when somebody asks",2],["Some evidence is stored centrally",3],["Collected against a control list on a schedule",4],["Continuously and automatically collected, mapped to controls",5]]},
+ {id:"q14",text:"How do you collect evidence that your controls are actually working?",
+  options:[["We don't collect evidence",1],["We scramble for it when a customer asks",2],["Some evidence is stored centrally",3],["Collected against a control list on a schedule",4],["Continuously and automatically collected, mapped to controls",5]]},
  {id:"q15",text:"Where are you with SOC 2 or ISO 27001 today?",
   options:[["We haven't looked into it",1],["We're exploring it because customers keep asking",2],["We know roughly where the gaps are but haven't started",3],["A readiness programme is already underway",4],["Certified or attested, and maintaining it",5]]}
 ];
@@ -393,8 +393,8 @@ function screenQuiz(){
 
   app.innerHTML='<div class="shell" style="padding-top:clamp(28px,6vh,58px)">'
   + '<h1 class="display">How ready are you for SOC 2 Type 1 or ISO 27001?</h1>'
-  + '<p class="lede">Fifteen questions covering the control areas a SOC 2 or ISO 27001 auditor will '
-  +   'ask about. Answer for how things work today, not how you plan them.</p>'
+  + '<p class="lede">Fifteen questions on the controls enterprise buyers check before they sign. '
+  +   'Answer for how things work today, not how you plan them.</p>'
   + (st.done && st.name && nAns()===NQ
        ? '<div class="doneline"><span class="tick">\u2713</span>'
          + '<span>You have already submitted this. Change an answer below to update it.</span>'
