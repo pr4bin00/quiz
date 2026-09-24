@@ -286,13 +286,10 @@ var NQ=QUESTIONS.length, MAX=NQ*5;
 
 /* ---------- state ---------- */
 var K_ATT="gc.attempt.v1", K_MINE="gc.mine.v1";
-var st={id:null,name:"",answers:{},order:{},open:{},startedAt:null,done:false,screen:"quiz"};
+var st={id:null,name:"",answers:{},open:{},startedAt:null,done:false,screen:"quiz"};
 var editingName=false;
 
 function uid(){ return "a"+Date.now().toString(36)+Math.random().toString(36).slice(2,7); }
-function shuffle(n){ var a=[],i,j,t; for(i=0;i<n;i++)a.push(i);
-  for(i=n-1;i>0;i--){ j=Math.floor(Math.random()*(i+1)); t=a[i];a[i]=a[j];a[j]=t; } return a; }
-function freshOrder(){ var o={}; QUESTIONS.forEach(function(q){ o[q.id]=shuffle(q.options.length); }); return o; }
 function rj(k,f){ try{ var v=localStorage.getItem(k); return v?JSON.parse(v):f; }catch(e){ return f; } }
 function persist(){
   try{
@@ -302,9 +299,8 @@ function persist(){
 }
 function revive(){
   var s=rj(K_ATT,null);
-  if(s&&s.order){ st.id=s.id||null; st.name=s.name||""; st.answers=s.answers||{}; st.order=s.order;
+  if(s){ st.id=s.id||null; st.name=s.name||""; st.answers=s.answers||{};
     st.open=s.open||{}; st.startedAt=s.startedAt||null; st.done=!!s.done; }
-  if(!st.order||!Object.keys(st.order).length) st.order=freshOrder();
 }
 function nAns(){ return Object.keys(st.answers).length; }
 function total(){ var t=0; for(var k in st.answers) t+=st.answers[k]; return t; }
@@ -368,7 +364,10 @@ var ARW='<svg class="arw" viewBox="0 0 16 16" fill="none" aria-hidden="true"><pa
 function screenQuiz(){
   var named=!!st.name, showGate=!named||editingName;
   var qs=QUESTIONS.map(function(q,i){
-    var order=st.order[q.id]||shuffle(q.options.length), chosen=st.answers[q.id], label="";
+    /* highest maturity first, 5 down to 1 */
+    var order=q.options.map(function(o,ix){return ix;})
+                .sort(function(a,b){ return q.options[b][1]-q.options[a][1]; });
+    var chosen=st.answers[q.id], label="";
     var opts=order.map(function(idx){
       var o=q.options[idx], on=chosen===o[1];
       if(on) label=o[0];
@@ -533,7 +532,7 @@ function flushThen(cb){
 
 /* ---------- routing ---------- */
 function reset(){
-  st.id=null; st.answers={}; st.order=freshOrder(); st.open={}; st.done=false; st.startedAt=null;
+  st.id=null; st.answers={}; st.open={}; st.done=false; st.startedAt=null;
   try{ localStorage.removeItem(K_ATT); }catch(e){}
   persist(); render(); window.scrollTo(0,0);
 }
