@@ -251,41 +251,46 @@ document.getElementById("theme").addEventListener("click",function(){
 
 /* ---------- questions ---------- */
 var QUESTIONS=[
- {id:"q1",text:"Who owns security and compliance in your company?",
+ {id:"q1",noScore:true,text:"Where does your company currently run its production workloads?",
+  options:[["Mostly on-prem, on our own servers",1],["A mix of on-prem and cloud",2],["Primarily cloud",3],["AWS or cloud-native",4],["Highly cloud-native, across multiple accounts",5]]},
+ {id:"q2",text:"Who owns security and compliance in your company?",
   options:[["Nobody specifically, it comes up when a customer asks",1],["Someone handles it informally alongside their main job",2],["A named owner with time set aside for it",3],["A named owner plus documented management review",4],["Defined ownership, with scheduled review by leadership",5]]},
- {id:"q2",text:"Do you have documented security policies?",
+ {id:"q3",text:"Do you have documented security policies?",
   options:[["Nothing written down",1],["A few informal notes or a section in the handbook",2],["Core policies written: access, incident, change, data",3],["A full policy set, formally approved and reviewed each year",4],["Policies mapped to controls, versioned, and acknowledged by every employee",5]]},
- {id:"q3",text:"Have you carried out a documented risk assessment?",
+ {id:"q4",text:"Have you carried out a documented risk assessment?",
   options:[["No",1],["We talk about risks informally",2],["A risk register exists but is rarely updated",3],["A documented assessment with named owners and treatment plans",4],["Reassessed on a schedule and feeding a Statement of Applicability",5]]},
- {id:"q4",text:"Do you know what data you hold, where it lives and how sensitive it is?",
+ {id:"q5",text:"Do you know what data you hold, where it lives and how sensitive it is?",
   options:[["No inventory, it lives in people's heads",1],["A rough idea, nothing written down",2],["An inventory exists but is maintained by hand",3],["Inventory maintained with classification and named owners",4],["Inventory largely automated, classified and reviewed regularly",5]]},
- {id:"q5",text:"How do people get access to your systems?",
+ {id:"q6",text:"How do people get access to your systems?",
   options:[["Shared accounts and shared passwords",1],["Individual accounts, MFA applied inconsistently",2],["Individual accounts with MFA enforced everywhere",3],["Centralised SSO with role-based access",4],["SSO, least privilege, and access reviews on a schedule",5]]},
- {id:"q6",text:"What happens when somebody joins or leaves?",
+ {id:"q7",text:"What happens when somebody joins or leaves?",
   options:[["Handled ad hoc, whoever remembers",1],["A checklist exists",2],["Access is granted and revoked centrally",3],["Automated onboarding and offboarding, with records kept",4],["Automated, reconciled against HR records, evidence retained",5]]},
- {id:"q7",text:"How do you manage secrets, API keys and credentials?",
+ {id:"q8",text:"How do you manage secrets, API keys and credentials?",
   options:[["In code, config files or shared documents",1],["A password manager covers some of it",2],["A managed secrets store",3],["Centralised, with rotation and least privilege",4],["Automated rotation, with access logged and reviewed",5]]},
- {id:"q8",text:"How do you manage vendors and sub-processors?",
+ {id:"q9",text:"How do you manage vendors and sub-processors?",
   options:[["We have no list of who we use",1],["We know the main ones informally",2],["A vendor list exists with signed contracts",3],["Vendors security-reviewed before onboarding, with DPAs in place",4],["Vendors risk-tiered and reviewed on a schedule, with evidence kept",5]]},
- {id:"q9",text:"How do code and infrastructure changes reach production?",
+ {id:"q10",text:"How do code and infrastructure changes reach production?",
   options:[["Anyone can push, no review",1],["Informal review, nothing recorded",2],["Pull requests with peer review",3],["Documented change process with approvals and rollback",4],["Enforced change control, separation of duties, full audit trail",5]]},
- {id:"q10",text:"How do you find and fix vulnerabilities?",
+ {id:"q11",text:"How do you find and fix vulnerabilities?",
   options:[["We don't actively look",1],["We patch when something breaks or we hear about it",2],["Dependency and infrastructure scanning is in place",3],["Scanning with agreed remediation timeframes",4],["Continuous scanning, tracked SLAs, and periodic penetration testing",5]]},
- {id:"q11",text:"Could you detect and respond to a security incident?",
+ {id:"q12",text:"Could you detect and respond to a security incident?",
   options:[["We would probably hear about it from someone else",1],["We have logs, but nothing alerts us",2],["Centralised logging with some alerting",3],["A documented incident response plan with named roles",4],["Continuous monitoring and an IR plan tested at least annually",5]]},
- {id:"q12",text:"How mature is your backup and recovery capability?",
+ {id:"q13",text:"How mature is your backup and recovery capability?",
   options:[["Ad hoc, or none",1],["Backups run but have never been restored",2],["Backups monitored and occasionally test-restored",3],["Agreed RPO and RTO with scheduled restore tests",4],["Tested, automated, with a documented continuity plan",5]]},
- {id:"q13",text:"Do your people receive security training?",
+ {id:"q14",text:"Do your people receive security training?",
   options:[["None",1],["Informal guidance when they join",2],["Security training at onboarding",3],["Annual training with completion records",4],["Annual training plus phishing simulation, with evidence retained",5]]},
- {id:"q14",text:"How do you collect evidence that your controls are actually working?",
+ {id:"q15",text:"How do you collect evidence that your controls are actually working?",
   options:[["We don't collect evidence",1],["We scramble for it when a customer asks",2],["Some evidence is stored centrally",3],["Collected against a control list on a schedule",4],["Continuously and automatically collected, mapped to controls",5]]},
- {id:"q15",text:"If a customer asked for proof of your security posture tomorrow, what could you send them?",
+ {id:"q16",text:"If a customer asked for proof of your security posture tomorrow, what could you send them?",
   options:[["Nothing, we would answer their questions from scratch each time",1],["A security page, or a few paragraphs in an email",2],["A completed questionnaire we reuse",3],["A filled-in standard questionnaire pack, or a penetration test report",4],["A SOC 2 or ISO 27001 report",5]]}
 ];
-var NQ=QUESTIONS.length, MAX=NQ*5;
+var NQ=QUESTIONS.length;
+var SCORED=QUESTIONS.filter(function(q){ return !q.noScore; });
+var NSCORED=SCORED.length, MAX=NSCORED*5;
+function counts(qid){ for(var i=0;i<QUESTIONS.length;i++) if(QUESTIONS[i].id===qid) return !QUESTIONS[i].noScore; return true; }
 
 /* ---------- state ---------- */
-var K_ATT="gc.attempt.v1", K_MINE="gc.mine.v1";
+var K_ATT="gc.attempt.v2", K_MINE="gc.mine.v2";
 var st={id:null,name:"",answers:{},open:{},startedAt:null,done:false,screen:"quiz"};
 var editingName=false;
 
@@ -303,10 +308,10 @@ function revive(){
     st.open=s.open||{}; st.startedAt=s.startedAt||null; st.done=!!s.done; }
 }
 function nAns(){ return Object.keys(st.answers).length; }
-function total(){ var t=0; for(var k in st.answers) t+=st.answers[k]; return t; }
+function total(){ var t=0; for(var k in st.answers) if(counts(k)) t+=st.answers[k]; return t; }
 function rec(){
   return { name:st.name||"Anonymous", answers:JSON.parse(JSON.stringify(st.answers)), total:total(),
-    answered:nAns(), completed:nAns()===NQ, startedAt:st.startedAt||new Date().toISOString(),
+    answered:nAns(), scored:NSCORED, completed:nAns()===NQ, startedAt:st.startedAt||new Date().toISOString(),
     updatedAt:new Date().toISOString() };
 }
 
@@ -392,7 +397,7 @@ function screenQuiz(){
 
   app.innerHTML='<div class="shell" style="padding-top:clamp(28px,6vh,58px)">'
   + '<h1 class="display">How ready are you for SOC 2 Type 1 or ISO 27001?</h1>'
-  + '<p class="lede">Fifteen questions on the controls enterprise buyers check before they sign. '
+  + '<p class="lede">Key questions on the controls enterprise buyers check before they sign. '
   +   'Answer for how things work today, not how you plan them.</p>'
   + (st.done && st.name && nAns()===NQ
        ? '<div class="doneline"><span class="tick">\u2713</span>'
