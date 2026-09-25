@@ -209,6 +209,7 @@ a{color:var(--accent)}
 .review .qt{font-size:.9rem;line-height:1.35}
 .review .at{display:block;font-family:var(--serif);font-size:.95rem;color:var(--mid);margin-top:3px;
   font-variation-settings:"opsz" 14}
+.review .s.ctx{color:var(--mid);background:var(--plate-2);box-shadow:inset 0 0 0 1px var(--rule);font-weight:600}
 .review .s{font-size:.78rem;font-weight:700;font-stretch:112%;color:var(--pick);
   background:var(--pick-soft);box-shadow:inset 0 0 0 1px var(--pick-line);border-radius:99px;padding:3px 11px}
 
@@ -291,14 +292,17 @@ document.getElementById("theme").addEventListener("click",function(){
   applyTheme();
 });
 
-var NQ=15, MAX=NQ*5;
-var K_ATT="gc.attempt.v1", K_MINE="gc.mine.v1";
+var NQ=16;
+var NOSCORE={q1:1};                       /* context only, excluded from the readiness score */
+var NSCORED=NQ-Object.keys(NOSCORE).length, MAX=NSCORED*5;
+var K_ATT="gc.attempt.v2", K_MINE="gc.mine.v2";
 function rj(k,f){ try{ var v=localStorage.getItem(k); return v?JSON.parse(v):f; }catch(e){ return f; } }
 function esc(s){ return String(s==null?"":s).replace(/[&<>"']/g,function(c){
   return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]; }); }
 var ARW='<svg class="arw" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M2 8h11M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 
-var QTEXT=["Who owns security and compliance in your company?",
+var QTEXT=["Where does your company currently run its production workloads?",
+"Who owns security and compliance in your company?",
 "Do you have documented security policies?",
 "Have you carried out a documented risk assessment?",
 "Do you know what data you hold, where it lives and how sensitive it is?",
@@ -372,7 +376,7 @@ function mine(){
   var att=rj(K_ATT,null);
   if(att && att.id && att.answers && Object.keys(att.answers).length){
     return { id:att.id, name:att.name||"Anonymous", answers:att.answers,
-             total:Object.keys(att.answers).reduce(function(s,k){ return s+att.answers[k]; },0),
+             total:Object.keys(att.answers).reduce(function(s,k){ return NOSCORE[k]?s:s+att.answers[k]; },0),
              answered:Object.keys(att.answers).length };
   }
   var m=rj(K_MINE,{}), keys=Object.keys(m);
@@ -407,12 +411,14 @@ if(!me || !me.answered){
     + contactHTML();
 
 } else {
-  var t=me.total, m=t/NQ, lv=levelFor(m);
+  var t=me.total, m=t/NSCORED, lv=levelFor(m);
   var review="";
   for(var i=0;i<NQ;i++){
     review+='<li><span class="n2">'+(i+1)+'</span>'
       + '<span><span class="qt">'+esc(QTEXT[i])+'</span></span>'
-      + '<span class="s">'+me.answers["q"+(i+1)]+'</span></li>';
+      + (NOSCORE["q"+(i+1)]
+          ? '<span class="s ctx">Context</span></li>'
+          : '<span class="s">'+me.answers["q"+(i+1)]+'</span></li>');
   }
   app.innerHTML='<span class="bignum fig">'+m.toFixed(1)+'<em>/ 5</em></span>'
     + '<span class="bigsub">Your estimated readiness for SOC 2 Type 1 and ISO 27001</span>'
