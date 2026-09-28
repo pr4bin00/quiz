@@ -201,6 +201,32 @@ a{color:var(--accent)}
 .contact-copy{min-width:0;max-width:56ch}
 .contact-copy h2{margin:0 0 7px;font-size:1.05rem;font-weight:700;letter-spacing:-.014em;color:var(--ink)}
 .contact p{margin:0;font-size:.92rem;line-height:1.5;color:var(--mid)}
+.leadform{margin:22px 0 0;width:100%}
+.lf-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px 18px}
+.lf-f{display:block;min-width:0}
+.lf-f label{display:block;font-size:.74rem;font-weight:600;color:var(--mid);margin-bottom:5px}
+.lf-f label i{font-style:normal;color:var(--faint);font-weight:500}
+.lf-f input{width:100%;background:var(--plate-2);border:1px solid var(--rule);border-radius:9px;
+  padding:11px 13px;font:inherit;font-size:.95rem;color:var(--ink);transition:border-color .15s,background .15s}
+.lf-f input::placeholder{color:var(--faint)}
+.lf-f input:focus{outline:none;border-color:var(--accent);background:var(--plate)}
+.lf-f.bad input{border-color:#c0392b;background:#fdf3f2}
+.lf-f .err{display:none;font-size:.74rem;color:#c0392b;margin-top:5px}
+.lf-f.bad .err{display:block}
+.lf-foot{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-top:18px}
+.lf-msg{font-size:.85rem;color:var(--mid)}
+.lf-msg.bad{color:#c0392b}
+.lf-done{display:flex;align-items:flex-start;gap:12px;background:var(--pick-soft);
+  border:1px solid var(--pick-line);border-radius:12px;padding:16px 18px;margin:22px 0 0}
+.lf-done b{display:block;font-size:.95rem;color:var(--pick);margin-bottom:3px}
+.lf-done p{margin:0;font-size:.88rem;color:var(--ink)}
+.lf-done .tick{width:22px;height:22px;border-radius:50%;background:var(--pick);color:#fff;
+  display:grid;place-items:center;font-size:.72rem;font-weight:700;flex:none}
+.booking{display:flex;align-items:center;justify-content:space-between;gap:18px;flex-wrap:wrap;
+  margin-top:24px;padding-top:22px;border-top:1px solid var(--rule)}
+.booking h3{margin:0 0 4px;font-size:1rem;font-weight:600;letter-spacing:-.012em;color:var(--ink)}
+.booking p{margin:0;font-size:.86rem;color:var(--mid)}
+.contact{display:block}
 .acts{display:flex;gap:10px;flex-wrap:wrap;margin:32px 0 0}
 .review{list-style:none;margin:46px 0 0;padding:0;border-top:1px solid var(--rule)}
 .review li{display:grid;grid-template-columns:26px 1fr auto;gap:16px;align-items:baseline;
@@ -361,12 +387,109 @@ function standingHTML(m){
 }
 
 function contactHTML(){
-  var url =CONFIG.contactUrl    ||"https://www.genesesolution.com/contact-us/";
   var head=CONFIG.contactHeading||"Ready to strengthen your security and compliance readiness?";
-  var text=CONFIG.contactText   ||"Learn more about ISO 27001 and SOC 2, understand what the next steps could look like, and speak with our team about your organisation\u2019s readiness.";
-  return '<div class="contact"><div class="contact-copy">'
-    + '<h2>'+esc(head)+'</h2><p>'+esc(text)+'</p></div>'
-    + '<a class="btn" href="'+esc(url)+'" target="_blank" rel="noopener">Contact us '+ARW+'</a></div>';
+  var text=CONFIG.contactText   ||"Learn more about ISO 27001 and SOC 2, understand what the next steps "
+    + "could look like, and speak with our team about your organisation\u2019s readiness.";
+  var book=CONFIG.bookingUrl    ||"https://calendar.app.google/QtvjayxiQoKKPuLJ7";
+
+  function field(id,label,type,ph,opt){
+    return '<span class="lf-f" id="wrap-'+id+'"><label for="'+id+'">'+esc(label)
+      + (opt?' <i>optional</i>':'')+'</label>'
+      + '<input id="'+id+'" type="'+type+'" placeholder="'+esc(ph)+'" autocomplete="'
+      + (id==="lf-email"?"email":id==="lf-phone"?"tel":id==="lf-company"?"organization":"name")+'">'
+      + '<span class="err" id="err-'+id+'"></span></span>';
+  }
+
+  var form = CONFIG.endpoint
+    ? '<form class="leadform" id="leadform" novalidate>'
+      + '<div class="lf-grid">'
+      +   field("lf-name","Your name","text","Priya Raman")
+      +   field("lf-email","Work email","email","priya@company.com")
+      +   field("lf-company","Company","text","Northwind")
+      +   field("lf-phone","Phone","tel","+977 ...",true)
+      + '</div>'
+      + '<div class="lf-foot"><button class="btn" id="lf-send" type="submit">Send my details</button>'
+      +   '<span class="lf-msg" id="lf-msg"></span></div>'
+      + '</form>'
+    : '';
+
+  return '<div class="contact">'
+    + '<div class="contact-copy"><h2>'+esc(head)+'</h2><p>'+esc(text)+'</p></div>'
+    + form
+    + '<div class="booking"><div><h3>Book a call with us</h3>'
+    +   '<p>Prefer to talk it through? Pick a time that suits you.</p></div>'
+    + '<a class="btn btn-line" href="'+esc(book)+'" target="_blank" rel="noopener">Book a call '+ARW+'</a>'
+    + '</div></div>';
+}
+
+/* Sends the contact form to the same endpoint the scores go to, with the same
+   confirm-and-retry behaviour, so a busy script does not swallow a lead. */
+function wireContact(){
+  var f=document.getElementById("leadform");
+  if(!f) return;
+  var me0=mine();
+  if(me0 && me0.name && me0.name!=="Anonymous") document.getElementById("lf-name").value=me0.name;
+
+  function bad(id,msg){
+    document.getElementById("wrap-"+id).classList.add("bad");
+    document.getElementById("err-"+id).textContent=msg;
+  }
+  function clear(){
+    ["lf-name","lf-email","lf-company","lf-phone"].forEach(function(id){
+      var w=document.getElementById("wrap-"+id); if(w) w.classList.remove("bad");
+    });
+  }
+
+  f.addEventListener("submit",function(ev){
+    ev.preventDefault();
+    clear();
+    var v=function(id){ return (document.getElementById(id).value||"").trim(); };
+    var name=v("lf-name"), email=v("lf-email"), company=v("lf-company"), phone=v("lf-phone");
+    var ok=true;
+    if(!name){ bad("lf-name","Please tell us your name."); ok=false; }
+    if(!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)){ bad("lf-email","Please enter a valid email address."); ok=false; }
+    if(!company){ bad("lf-company","Please tell us your company."); ok=false; }
+    if(!ok) return;
+
+    var btn=document.getElementById("lf-send"), msg=document.getElementById("lf-msg");
+    btn.disabled=true; btn.textContent="Sending\u2026"; msg.className="lf-msg"; msg.textContent="";
+
+    var id=(me0&&me0.id)||("lead"+Date.now().toString(36)+Math.random().toString(36).slice(2,7));
+    var body=JSON.stringify({action:"lead",id:id,lead:{name:name,email:email,phone:phone,company:company}});
+    var tries=0;
+    (function go(){
+      tries++;
+      var retry=function(){
+        if(tries<4){ setTimeout(go, 700*Math.pow(2,tries-1)+Math.random()*700); return true; }
+        return false;
+      };
+      fetch(CONFIG.endpoint,{method:"POST",body:body})
+        .then(function(r){ return r.json().then(function(j){return j;},function(){return null;}); })
+        .then(function(j){
+          if(j&&j.ok){
+            f.outerHTML='<div class="lf-done"><span class="tick">\u2713</span><span>'
+              + '<b>Thank you, we have your details.</b>'
+              + '<p>Someone from the team will be in touch shortly. You can also book a time below.</p>'
+              + '</span></div>';
+            return;
+          }
+          if(j&&j.error==="email invalid"){
+            btn.disabled=false; btn.textContent="Send my details";
+            bad("lf-email","Please enter a valid email address."); return;
+          }
+          if(!retry()){
+            btn.disabled=false; btn.textContent="Send my details";
+            msg.className="lf-msg bad"; msg.textContent="Could not send that. Please try again, or book a call below.";
+          }
+        })
+        .catch(function(){
+          if(!retry()){
+            btn.disabled=false; btn.textContent="Send my details";
+            msg.className="lf-msg bad"; msg.textContent="Could not send that. Please try again, or book a call below.";
+          }
+        });
+    })();
+  });
 }
 
 /* Your own result only. It is read straight from this browser. This page never
@@ -448,6 +571,8 @@ if(!me || !me.answered){
     + '<ol class="review">'+review+'</ol>'
     + contactHTML();
 }
+
+wireContact();
 
 })();
 </script>
