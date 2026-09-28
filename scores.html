@@ -385,6 +385,28 @@ function mine(){
   return { id:keys[0], name:r.name, answers:r.answers||{}, total:r.total||0, answered:r.answered||0 };
 }
 
+var K_PEND="gc.pending.v2";
+(function resendIfNeeded(){
+  var pend; try{ pend=localStorage.getItem(K_PEND); }catch(e){ return; }
+  if(!pend || !CONFIG.endpoint) return;
+  var att; try{ att=JSON.parse(localStorage.getItem(K_ATT)||"null"); }catch(e){ return; }
+  if(!att || att.id!==pend || !att.answers) return;
+  var total=Object.keys(att.answers).reduce(function(t,k){ return NOSCORE[k]?t:t+att.answers[k]; },0);
+  var body=JSON.stringify({action:"save",id:att.id,record:{
+    name:att.name||"Anonymous", answers:att.answers, total:total,
+    answered:Object.keys(att.answers).length, completed:Object.keys(att.answers).length===NQ,
+    startedAt:att.startedAt||new Date().toISOString(), updatedAt:new Date().toISOString()}});
+  var tries=0;
+  (function go(){
+    tries++;
+    var again=function(){ if(tries<5) setTimeout(go, 1200*tries+Math.random()*900); };
+    fetch(CONFIG.endpoint,{method:"POST",body:body})
+      .then(function(r){ return r.json().then(function(j){return j;},function(){return null;}); })
+      .then(function(j){ if(j&&j.ok){ try{ localStorage.removeItem(K_PEND); }catch(e){} } else again(); })
+      .catch(again);
+  })();
+})();
+
 var app=document.getElementById("app");
 var me=mine();
 
