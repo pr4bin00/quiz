@@ -552,7 +552,7 @@ function submit(){
   /* make sure the completed record reaches the sheet, then show them their result */
   var gone=false;
   var leave=function(){ if(gone) return; gone=true; location.href=CONFIG.scoresUrl||"scores.html"; };
-  setTimeout(leave,5000);              /* never hang; the results page finishes the job */
+  setTimeout(leave,3000);              /* never hang; the results page finishes the job */
   flushThen(leave);
 }
 
