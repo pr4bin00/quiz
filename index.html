@@ -327,7 +327,38 @@ var MODE="local", DB=null, pending=false, busy=false, again=false, wt=null;
 })();
 function afterBoot(){ if(pending){ pending=false; push(); } }
 function shared(){ return MODE==="claude"||MODE==="remote"; }
-function queue(){ persist(); if(wt) clearTimeout(wt); wt=setTimeout(push,350); }
+var lastSent=0, MIN_GAP=8000;
+var K_PEND="gc.pending.v2";
+function markPending(on){ try{ on?localStorage.setItem(K_PEND,st.id):localStorage.removeItem(K_PEND); }catch(e){} }
+
+/* Posts the record and confirms the server actually accepted it.
+   A lock timeout or an error page is a FAILURE, not a success, so it retries
+   with backoff and jitter. This is what protects a room full of people
+   submitting at the same moment. */
+function postRecord(cb){
+  var tries=0, body=JSON.stringify({action:"save",id:st.id,record:rec()});
+  (function go(){
+    tries++;
+    var again=function(){
+      if(tries<4) setTimeout(go, 700*Math.pow(2,tries-1)+Math.random()*800);
+      else cb(false);
+    };
+    fetch(CONFIG.endpoint,{method:"POST",body:body})
+      .then(function(r){ return r.json().then(function(j){return j;},function(){return null;}); })
+      .then(function(j){ if(j&&j.ok){ lastSent=Date.now(); cb(true); } else again(); })
+      .catch(again);
+  })();
+}
+
+/* Nothing reads the sheet live any more, so mid-quiz saves exist only to
+   capture people who abandon. One every 8s is plenty, and it keeps a class
+   of 30 from hammering the endpoint on every single answer. */
+function queue(){
+  persist();
+  if(wt) clearTimeout(wt);
+  var since=Date.now()-lastSent;
+  wt=setTimeout(push, since>=MIN_GAP ? 400 : (MIN_GAP-since));
+}
 function push(){
   if(!st.id||!st.name||!shared()) return;
   if(MODE==="claude"&&!DB){ pending=true; return; }
@@ -339,8 +370,7 @@ function push(){
     if(MODE==="claude"&&e&&e.code==="unavailable") setTimeout(push,1200+Math.random()*800);
   };
   if(MODE==="claude") DB.doc("responses/"+st.id).set(rec()).then(done).catch(fail);
-  else fetch(CONFIG.endpoint,{method:"POST",body:JSON.stringify({action:"save",id:st.id,record:rec()})})
-        .then(done).catch(fail);
+  else postRecord(function(ok){ busy=false; if(again){ again=false; push(); } });
 }
 
 /* ---------- helpers ---------- */
@@ -522,7 +552,7 @@ function submit(){
   /* make sure the completed record reaches the sheet, then show them their result */
   var gone=false;
   var leave=function(){ if(gone) return; gone=true; location.href=CONFIG.scoresUrl||"scores.html"; };
-  setTimeout(leave,1800);              /* never hang on a slow network */
+  setTimeout(leave,5000);              /* never hang; the results page finishes the job */
   flushThen(leave);
 }
 
@@ -530,9 +560,9 @@ function submit(){
 function flushThen(cb){
   if(wt) clearTimeout(wt);
   if(!st.id||!st.name||!shared()){ cb(); return; }
-  if(MODE==="claude") DB.doc("responses/"+st.id).set(rec()).then(cb,cb);
-  else fetch(CONFIG.endpoint,{method:"POST",
-        body:JSON.stringify({action:"save",id:st.id,record:rec()})}).then(cb,cb);
+  if(MODE==="claude"){ DB.doc("responses/"+st.id).set(rec()).then(cb,cb); return; }
+  markPending(true);                 /* cleared only once the server confirms */
+  postRecord(function(ok){ if(ok) markPending(false); cb(); });
 }
 
 /* ---------- routing ---------- */
