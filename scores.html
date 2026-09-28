@@ -403,10 +403,10 @@ function contactHTML(){
   var form = CONFIG.endpoint
     ? '<form class="leadform" id="leadform" novalidate>'
       + '<div class="lf-grid">'
-      +   field("lf-name","Your name","text","Priya Raman")
-      +   field("lf-email","Work email","email","priya@company.com")
-      +   field("lf-company","Company","text","Northwind")
-      +   field("lf-phone","Phone","tel","+977 ...",true)
+      +   field("lf-name","Your name","text","Name")
+      +   field("lf-email","Work email","email","Email")
+      +   field("lf-company","Company","text","Company")
+      +   field("lf-phone","Phone","tel","Phone.",true)
       + '</div>'
       + '<div class="lf-foot"><button class="btn" id="lf-send" type="submit">Send my details</button>'
       +   '<span class="lf-msg" id="lf-msg"></span></div>'
